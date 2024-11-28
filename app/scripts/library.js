@@ -1,4 +1,4 @@
-const bookLibrary = [];
+let bookLibrary = [];
 let formVisible = false;
 const table = document.getElementById("table-body");
 const form = document.getElementById("book-form");
@@ -16,11 +16,19 @@ function Book(title, author, pages, hasRead) {
     this.author = author;
     this.pages = pages;
     this.hasRead = hasRead;
+    this.index = undefined;
     this.info = function () {
         let string = `${this.title} by ${this.author}, ${this.pages} pages, `
         return string += hasRead ? 'read' : 'not read yet';
     }
 }
+
+Book.prototype.toggleReadStatus = function () {
+    this.hasRead = !this.hasRead;
+    displayBooksToPage();
+};
+
+
 
 function addBookToLibrary(event) {
     event.preventDefault();
@@ -29,14 +37,20 @@ function addBookToLibrary(event) {
     displayBooksToPage();
 }
 
+function removeBookFromLibrary(index) {
+    bookLibrary = bookLibrary.toSpliced(index, 1);
+    displayBooksToPage();
+}
+
 function displayBooksToPage() {
-    let count = 0;
     table.replaceChildren()
+    let count = 0;
     for (const book of bookLibrary) {
+        book.index = count;
         const row = document.createElement("tr");
 
         const index = document.createElement("td");
-        index.textContent = count.toString();
+        index.textContent = book.index.toString();
         row.appendChild(index);
 
         const title = document.createElement("td");
@@ -52,8 +66,16 @@ function displayBooksToPage() {
         row.appendChild(pages);
 
         const hasRead = document.createElement("td");
-        hasRead.textContent = book.hasRead ? "true" : "false";
+        const readBtn = document.createElement("button");
+        readBtn.textContent = book.hasRead ? "true" : "false";
+        readBtn.addEventListener("click", () => book.toggleReadStatus());
+        hasRead.appendChild(readBtn);
         row.appendChild(hasRead);
+
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "-";
+        delBtn.addEventListener("click", () => removeBookFromLibrary(book.index));
+        row.appendChild(delBtn);
 
         table.appendChild(row);
         count++;
